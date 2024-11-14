@@ -1,9 +1,18 @@
+const sqlite3 = require('sqlite3').verbose();
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
+const LoginHistoryDAO = require('./LoginHistoryDAO');
 
 class AuthDAO {
-    constructor(db) {
-        this.db = db;
+    constructor(dbPath) {
+        this.db = new sqlite3.Database(dbPath, (err) => {
+            if (err) {
+                console.log(`komunikat oczekiwany: Failed to connect to database: ${err.message}`);
+            } else {
+                console.log('komunikat oczekiwany: Connected to the database.');
+            }
+        });
+        this.loginHistoryDAO = new LoginHistoryDAO(dbPath);
     }
 
     register(email, password, permission = 'user') {
@@ -42,15 +51,18 @@ class AuthDAO {
                     reject(err);
                 } else if (!user) {
                     console.warn(`Ostrzeżenie: Użytkownik nie znaleziony: ${email}`);
+                    await this.loginHistoryDAO.logLogin(null, new Date().toISOString(), 'failure');
                     reject(new Error('User not found'));
                 } else {
                     const isMatch = await bcrypt.compare(password, user.password);
                     if (isMatch) {
                         const token = jwt.sign({ user_id: user.user_id, email: user.email, permission: user.permission }, 'your_jwt_secret', { expiresIn: '1h' });
                         console.log(`Zwracany komunikat: Użytkownik zalogowany, token wygenerowany dla: ${email}`);
+                        await this.loginHistoryDAO.logLogin(user.user_id, new Date().toISOString(), 'success');
                         resolve({ token });
                     } else {
                         console.warn(`Ostrzeżenie: Nieprawidłowe hasło dla użytkownika: ${email}`);
+                        await this.loginHistoryDAO.logLogin(user.user_id, new Date().toISOString(), 'failure');
                         reject(new Error('Invalid password'));
                     }
                 }

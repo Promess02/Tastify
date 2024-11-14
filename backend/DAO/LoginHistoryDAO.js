@@ -2,7 +2,13 @@ const sqlite3 = require('sqlite3').verbose();
 
 class LoginHistoryDAO {
     constructor(dbPath) {
-        this.db = new sqlite3.Database(dbPath);
+        this.db = new sqlite3.Database(dbPath, (err) => {
+            if (err) {
+                console.log(`komunikat oczekiwany: Failed to connect to database: ${err.message}`);
+            } else {
+                console.log('komunikat oczekiwany: Connected to the database.');
+            }
+        });
     }
 
     logLogin(user_id, time_of_login, login_status) {
