@@ -1,0 +1,6 @@
+backend/node_modules
+middleware/node_modules
+.vscode
+recipe-app/node_modules
+recipe-app/node_modules/.cache/default-development
+*.pack

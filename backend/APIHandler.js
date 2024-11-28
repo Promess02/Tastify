@@ -3,18 +3,20 @@ const router = express.Router();
 const authenticateToken = require('../middleware/auth.js');
 const checkAdmin = require('../middleware/checkAdmin.js');
 const RecipesDAO = require('./DAO/RecipesDAO.js');
+const CategoriesDAO = require('./DAO/CategoriesDAO.js');
 const AuthDAO = require('./DAO/AuthDAO.js');
 const UserDAO = require('./DAO/UsersDAO.js');
 const FavoriteRecipesDAO = require('./DAO/FavoriteRecipesDAO');
 
 const dbPath = 'C:\\Users\\miko2\\OneDrive\\Dokumenty\\SSI\\Projekt_SSI\\Tastify\\recipeApp.db';
 const recipesDAO = new RecipesDAO(dbPath);
+const categoriesDAO = new CategoriesDAO(dbPath);
 const authDAO = new AuthDAO(dbPath);
 const userDAO = new UserDAO(dbPath);
 const favoriteRecipesDAO = new FavoriteRecipesDAO(dbPath);
 
 // 1. pobiera wszystkie przepisy
-router.get('/recipes', authenticateToken, async (req, res) => {
+router.get('/recipes', async (req, res) => {
     try {
         const recipes = await recipesDAO.getAllRecipes();
         res.json({ recipes });
@@ -40,6 +42,24 @@ router.get('/recipes/search/params', authenticateToken, async (req, res) => {
     try {
         const recipes = await recipesDAO.searchRecipesByParams(diet, calories, category);
         res.json(recipes);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+router.get('/recipes/getDishCategories', async (req, res) => {
+    try {
+        const categories = await categoriesDAO.getAllDishCategories();
+        res.json({categories});
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+router.get('/recipes/getDietCategories', async (req, res) => {
+    try {
+        const categories = await categoriesDAO.getAllDietCategories();
+        res.json({categories});
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
@@ -204,9 +224,9 @@ router.post('/login', async (req, res) => {
 
 // 15. Resetowanie hasła
 router.post('/auth/reset-password', async (req, res) => {
-    const { email, newPassword } = req.body;
+    const { email, oldPassword, newPassword } = req.body;
     try {
-        const result = await authDAO.resetPassword(email, newPassword);
+        const result = await authDAO.resetPassword(email, oldPassword, newPassword);
         res.json(result);
     } catch (err) {
         res.status(500).json({ error: err.message });

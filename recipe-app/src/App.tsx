@@ -1,24 +1,30 @@
 import React, { useState, useEffect } from 'react';
 import Recipe from './DTO/Recipe.tsx';
 import axios from 'axios';
+import PaginatedRecipes from './components/PaginatedRecipes.tsx';
 import Login from './components/LoginForm.js'; 
+import TopBar from './components/TopBar.tsx';
 import jwt from 'jsonwebtoken';
+import FilterDrawer from './components/FilterDrawer.tsx';
+import ResetPassword from './components/ResetPassword.tsx';
 import './App.css';
 
-const Recipes = () => {
+const App: React.FC = () => {
     const [recipes, setRecipes] = useState<Recipe[]>([]);
     const [isLoggedIn, setIsLoggedIn] = useState(false);
     const [user, setUser] = useState({ email: '', permission: '' });
+    const [searchTerm, setSearchTerm] = useState('');
+    const [filters, setFilters] = useState({});
+    const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+    const [showResetPassword, setShowResetPassword] = useState(false);
 
     useEffect(() => {
         const fetchRecipes = async () => {
+            const response = await axios.get('http://localhost:4000/recipes');
+            setRecipes(response.data.recipes);
             try {
                 const token = localStorage.getItem('token');
                 if (token) {
-                    const response = await axios.get('http://localhost:4000/recipes', {
-                        headers: { Authorization: `Bearer ${token}` }
-                    });
-                    setRecipes(response.data.recipes);
                     setIsLoggedIn(true);
                     const userInfo = jwt.decode(token);
                     setUser({ email: userInfo.email, permission: userInfo.permission });
@@ -31,65 +37,84 @@ const Recipes = () => {
         fetchRecipes();
     }, []);
 
+    useEffect(() => {
+        if (isDrawerOpen) {
+            const timer = setTimeout(() => {
+                document.addEventListener('click', handleClickOutside);
+            }, 0);
+            return () => {
+                clearTimeout(timer);
+                document.removeEventListener('click', handleClickOutside);
+            };
+        } else {
+            document.removeEventListener('click', handleClickOutside);
+        }
+    }, [isDrawerOpen]);
+
     const handleLoginSuccess = (token) => {
         const userInfo = jwt.decode(token);
         setUser({ email: userInfo.email, permission: userInfo.permission });
         setIsLoggedIn(true);
-        fetchRecipes();
-    };
-
-    const fetchRecipes = async () => {
-        try {
-            const token = localStorage.getItem('token');
-            if (token) {
-                const response = await axios.get('http://localhost:4000/recipes', {
-                    headers: { Authorization: `Bearer ${token}` }
-                });
-                setRecipes(response.data.recipes);
-            }
-        } catch (err) {
-            console.error(err);
-        }
     };
 
     const handleLogout = () => {
         localStorage.removeItem('token');
         setIsLoggedIn(false);
         setUser({ email: '', permission: '' });
-        setRecipes([]);
+    };
+
+    const handleSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
+        setSearchTerm(event.target.value);
+    };
+
+    const handleFilterChange = (newFilters: any) => {
+        setFilters(newFilters);
+    };
+
+    const toggleDrawer = () => {
+        setIsDrawerOpen(true);
+    };
+
+    const handleClickOutside = (event: MouseEvent) => {
+        const drawer = document.querySelector('.filter-drawer');
+        if (drawer && !drawer.contains(event.target as Node)) {
+            setIsDrawerOpen(false);
+        }
+    };
+
+    const handleResetPassword = () => {
+        setShowResetPassword(true);
+    };
+
+    const handleClose = () => {
+        setShowResetPassword(false);
     };
 
     return (
-        <div className = "app-container">
-           {!isLoggedIn ? (
-            <div className='login-container'>
-                 <Login onLoginSuccess={handleLoginSuccess} />
+        <div>
+            <div className='title-banner'>
+                <h1>Tastify</h1>
             </div>
-            ) : (
+            <div className='app-container'>
+                {!isLoggedIn && <Login onLoginSuccess={handleLoginSuccess} />}
+                {showResetPassword && <ResetPassword user={user} onClose={handleClose} />}
+                <TopBar
+                    user={user}
+                    isLoggedIn={isLoggedIn}
+                    searchTerm={searchTerm}
+                    handleSearch={handleSearch}
+                    handleLogout={handleLogout}
+                    handleLoginSuccess={handleLoginSuccess}
+                    resetPassword={handleResetPassword}
+                    toggleDrawer={toggleDrawer}
+                />
                 <div>
-                <div>
-                    <div className='user-info'>
-                        <p>Email: {user.email}</p>
-                        <p>Permission: {user.permission}</p>
-                        <button onClick={handleLogout}>Logout</button>
-                    </div>
+                    {isDrawerOpen && <FilterDrawer onFilterChange={handleFilterChange} isLoggedIn={isLoggedIn}/> }
+                    <PaginatedRecipes recipes={recipes} searchTerm={searchTerm} filters={filters} isLoggedin={isLoggedIn}/>
                 </div>
-                <h1>Recipes</h1>
-                <ul className='recipe-list'>
-                    {recipes.map((recipe) => (
-                        <li key={recipe.recipe_id} className='recipe-item'>
-                            <h2>{recipe.recipe_name}</h2>
-                            <p>{recipe.ingredients}</p>
-                            <p>{recipe.instructions}</p>
-                            <p>Preparation Time: {recipe.prepare_time} minutes</p>
-                            <p>Calories: {recipe.calories}</p>
-                        </li>
-                    ))}
-                </ul>
             </div>
-            )}
         </div>
     );
 };
 
-export default Recipes;
+export default App;

@@ -6,6 +6,7 @@ const Login = ({ onLoginSuccess }) => {
     const [password, setPassword] = useState('');
     const [isRegister, setIsRegister] = useState(false);
     const [message, setMessage] = useState('');
+    const [resetPassword, setResetPassword] = useState(false);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -22,11 +23,15 @@ const Login = ({ onLoginSuccess }) => {
         }
     };
 
+    const handleResetPassword = async (e) => {
+
+    }
+
     return (
         <div className='login-container'>
             <h2>{isRegister ? 'Register' : 'Login'}</h2>
             <form onSubmit={handleSubmit}>
-                <div>
+                <div className='form-group'>
                     <label>Email:</label>
                     <input
                         type="email"
@@ -35,7 +40,7 @@ const Login = ({ onLoginSuccess }) => {
                         required
                     />
                 </div>
-                <div>
+                <div className='form-group'>
                     <label>Password:</label>
                     <input
                         type="password"
@@ -44,16 +49,17 @@ const Login = ({ onLoginSuccess }) => {
                         required
                     />
                 </div>
-                <button type="submit">{isRegister ? 'Register' : 'Login'}</button>
+                <button type="submit" className='submit-button'>{isRegister ? 'Register' : 'Login'}</button>
             </form>
-            <p>{message}</p>
-            <p>
+            <p className='message'>{message}</p>
+            <p className='toggle'>
                 {isRegister ? (
                     <span onClick={() => setIsRegister(false)}>Already registered? Click here to login.</span>
                 ) : (
                     <span onClick={() => setIsRegister(true)}>Click if you are not registered yet.</span>
                 )}
             </p>
+            <p className='toggle'><span onClick={setResetPassword}>Did you forget your password?</span></p>
         </div>
     );
 };

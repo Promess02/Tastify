@@ -70,7 +70,7 @@ class AuthDAO {
         });
     }
 
-    resetPassword(email, newPassword) {
+    resetPassword(email, oldPassword, newPassword) {
         return new Promise(async (resolve, reject) => {
             try {
                 console.log(`Oczekiwany komunikat: Resetowanie hasła dla użytkownika z emailem: ${email}`);

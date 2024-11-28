@@ -44,11 +44,28 @@ class CategoriesDAO {
         });
     }
 
-    getAllCategories() {
+    getAllDishCategories() {
         return new Promise((resolve, reject) => {
             console.log(`Oczekiwany komunikat: Pobieranie wszystkich kategorii`);
             
-            const sql = 'SELECT * FROM Categories';
+            const sql = 'SELECT * FROM Categories where category_type = "dish"';
+            this.db.all(sql, [], (err, rows) => {
+                if (err) {
+                    console.error(`Błąd podczas pobierania wszystkich kategorii`, err);
+                    reject(err);
+                } else {
+                    console.log(`Zwracany komunikat: Znaleziono kategorie: ${JSON.stringify(rows)}`);
+                    resolve(rows);
+                }
+            });
+        });
+    }
+
+    getAllDietCategories() {
+        return new Promise((resolve, reject) => {
+            console.log(`Oczekiwany komunikat: Pobieranie wszystkich kategorii`);
+            
+            const sql = 'SELECT * FROM Categories where category_type = "diet"';
             this.db.all(sql, [], (err, rows) => {
                 if (err) {
                     console.error(`Błąd podczas pobierania wszystkich kategorii`, err);
