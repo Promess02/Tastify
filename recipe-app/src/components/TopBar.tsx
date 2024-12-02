@@ -11,9 +11,10 @@ interface TopBarProps {
     handleLoginSuccess: (userData: { email: string; permission: string }) => void;
     resetPassword: () => void;
     toggleDrawer: () => void;
+    openAdminPanel: () => void;
 }
 
-const TopBar: React.FC<TopBarProps> = ({ user, isLoggedIn, searchTerm, handleSearch, handleLogout, resetPassword, toggleDrawer }) => {
+const TopBar: React.FC<TopBarProps> = ({ user, isLoggedIn, searchTerm, handleSearch, handleLogout, resetPassword, toggleDrawer, openAdminPanel }) => {
     return (
         <div className="top-bar">
             <button className="filter-button" onClick={toggleDrawer}>Filter recipes</button>
@@ -31,6 +32,7 @@ const TopBar: React.FC<TopBarProps> = ({ user, isLoggedIn, searchTerm, handleSea
                     <p>{user.email}</p>
                     <button onClick={handleLogout}><b>Logout</b></button>
                     <button onClick={resetPassword}><b>Reset Password</b></button>
+                    {user.permission === 'admin' && <button onClick={openAdminPanel}><b>Admin panel</b></button>}
                 </div>}
         </div>
     );

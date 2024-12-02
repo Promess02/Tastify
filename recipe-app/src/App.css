@@ -14,6 +14,7 @@
   position: fixed;
   padding: 20px 0;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  z-index: 1;
 }
 
 .title-banner h1 {
@@ -34,6 +35,7 @@
   align-items: center;
   padding: 10px 20px;
   background-color: #f8f9fa;
+  z-index: 1;
 }
 
 .filter-button {
@@ -65,7 +67,6 @@
 
 .filter-group input[type="checkbox"]:focus {
   outline: none;
-  box-shadow: 0 0 3px 2px rgba(0, 123, 255, 0.25);
 }
 
 .filter-group input[type="checkbox"]:hover {
@@ -76,15 +77,32 @@
   background-color: #b12f95;
 }
 
+.filter-drawer {
+  display: none;
+  z-index: 2;
+}
+
+.filter-drawer.open {
+  display: block;
+  /* Other styles for the open state */
+}
+
+.filter-drawer.closed {
+  display: none;
+  /* Other styles for the closed state */
+}
+
 .search-container {
   flex-grow: 1;
   display: flex;
   justify-content: center;
+  margin-bottom: 20px;
 }
 
 .search-bar {
   width: 600px; /* Fixed width */
-  padding: 10px;
+  padding: 15px;
+  margin-bottom: 10px;
   border: 1px solid #ddd;
   border-radius: 4px;
   flex: center;
@@ -100,6 +118,52 @@
 
 .user-info {
   margin-bottom: 20px;
+}
+
+.recipe-admin-list {
+  width: 100%;
+  text-align: center;
+}
+
+.recipe-admin-list table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 20px;
+}
+
+.recipe-admin-list th, .recipe-list td {
+  border: 1px solid #ddd;
+  padding: 8px;
+}
+
+.new-recipe-button {
+  margin-bottom: 20px;
+  margin-left: 20px;
+  padding: 10px 20px;
+  border: none;
+  background-color: #ff7043;
+  color: white;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  border-radius: 5px;
+}
+
+.new-recipe-button:hover {
+  background-color: #9e462b;
+}
+
+.recipe-admin-list th {
+  background-color: #f2f2f2;
+}
+
+.action-icon {
+  margin: 0 5px;
+  cursor: pointer;
+  transition: color 0.3s;
+}
+
+.action-icon:hover {
+  color: #b36500;
 }
 
 .recipe-list {
@@ -471,4 +535,226 @@
   to {
     transform: rotate(360deg);
   }
+}
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background-color: white;
+  width: 80%;
+  height: 90%;
+  padding: 20px;
+  border-radius: 10px;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.close-button {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: none;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+}
+
+.back-button {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  background: none;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+}
+
+.admin-buttons {
+  display: flex;
+  justify-content: space-around;
+  width: 60%;
+}
+
+.admin-button {
+  width: 200px;
+  padding: 15px;
+  margin: 10px;
+  font-size: 18px;
+  cursor: pointer;
+  border: none;
+  border-radius: 5px;
+  background-color: #ff7043;
+  color: white;
+  transition: background-color 0.3s;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.admin-button:hover {
+  background-color: #a84a2d;
+}
+
+.admin-button svg {
+  margin-top: 10px;
+}
+
+.user-list {
+  width: 100%;
+  text-align: center;
+}
+
+.user-list .filter-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.user-list .search-bar {
+  padding: 10px;
+  width: 50%;
+  font-size: 16px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  margin-right: 10px;
+}
+
+.user-list .filter-dropdown {
+  padding: 10px;
+  font-size: 16px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  margin-right: 10px;
+}
+
+.user-list table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 20px;
+}
+
+.user-list th, .user-list td {
+  border: 1px solid #ddd;
+  padding: 8px;
+}
+
+.user-list th {
+  background-color: #f2f2f2;
+}
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+
+.pagination button {
+  margin: 0 5px;
+  padding: 10px 15px;
+  border: none;
+  background-color: #ff7043;
+  color: white;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.pagination button.active {
+  background-color: #ff7043;
+}
+
+.pagination button:hover {
+  background-color: #a8492c;
+}
+
+.confirm-button {
+  padding: 10px 20px;
+  border: none;
+  background-color: #28a745;
+  color: white;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.confirm-button:hover {
+  background-color: #218838;
+}
+
+.edit-recipe-modal {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 600px;
+  background-color: white;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  z-index: 1001;
+}
+
+.edit-recipe-modal .form-group {
+  margin-bottom: 15px;
+}
+
+.edit-recipe-modal .form-group label {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: bold;
+}
+
+.edit-recipe-modal .form-group input,
+.edit-recipe-modal .form-group textarea,
+.edit-recipe-modal .form-group select {
+  width: 100%;
+  padding: 8px;
+  box-sizing: border-box;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.edit-recipe-modal .form-actions {
+  display: flex;
+  justify-content: space-between;
+}
+
+.edit-recipe-modal .form-actions button {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.edit-recipe-modal .form-actions button:first-child {
+  background-color: #28a745;
+  color: white;
+}
+
+.edit-recipe-modal .form-actions button:first-child:hover {
+  background-color: #218838;
+}
+
+.edit-recipe-modal .form-actions button:last-child {
+  background-color: #dc3545;
+  color: white;
+}
+
+.edit-recipe-modal .form-actions button:last-child:hover {
+  background-color: #c82333;
 }

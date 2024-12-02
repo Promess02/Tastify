@@ -11,6 +11,19 @@ class UserDAO {
         });
     }
 
+    getAllUsers() {
+        return new Promise((resolve, reject) => {            
+            const sql = 'SELECT * FROM Users';
+            this.db.all(sql, [], (err, rows) => {
+                if (err) {
+                    reject(err);
+                } else {
+                    resolve(rows);
+                }
+            });
+        });
+    }
+
     getUserByEmail(email) {
         return new Promise((resolve, reject) => {
             console.log(`Oczekiwany komunikat: Wyszukiwanie użytkowników z emailem: ${email}`);

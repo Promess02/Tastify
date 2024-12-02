@@ -10,11 +10,12 @@ interface Category {
 }
 
 interface FilterDrawerProps {
+    isDrawerOpen: boolean;
     onFilterChange: (filters: any) => void;
     isLoggedIn: boolean;
 }
 
-const FilterDrawer: React.FC<FilterDrawerProps> = ({ onFilterChange, isLoggedIn }) => {
+const FilterDrawer: React.FC<FilterDrawerProps> = ({ isDrawerOpen, onFilterChange, isLoggedIn }) => {
     const [prepareTime, setPrepareTime] = useState(180);
     const [dishCategory, setDishCategory] = useState('ALL');
     const [dietCategory, setDietCategory] = useState('ALL');
@@ -63,7 +64,7 @@ const FilterDrawer: React.FC<FilterDrawerProps> = ({ onFilterChange, isLoggedIn 
     };
 
     return (
-        <div className="filter-drawer">
+        <div className={`filter-drawer ${isDrawerOpen ? 'open' : 'closed'}`}>
             <h2>Filter Recipes</h2>
             <div className="filter-group">
                 <label>Preparation Time (minutes):</label>

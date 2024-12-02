@@ -166,6 +166,15 @@ router.get('/users/search', authenticateToken, checkAdmin, async (req, res) => {
     }
 });
 
+router.get('/users', authenticateToken, checkAdmin, async (req, res) => {
+    try {
+        const users = await userDAO.getAllUsers();
+        res.json(users);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
 // 11. Blokowanie użytkownika
 router.put('/users/:userId/block', authenticateToken, checkAdmin, async (req, res) => {
     const { userId } = req.params;
@@ -193,7 +202,7 @@ router.put('/users/:userId/permissions', authenticateToken, checkAdmin, async (r
     const { userId } = req.params;
     const { permission } = req.body;
     try {
-        const result = await userDAO.changeUserPermissions(userId, permission);
+        const result = await userDAO.updateUserPermissions(userId, permission);
         res.json(result);
     } catch (err) {
         res.status(500).json({ error: err.message });
@@ -213,7 +222,7 @@ router.post('/register', async (req, res) => {
 
 // 14. logowanie użytkownika
 router.post('/login', async (req, res) => {
-    const { email, password } = req.body;
+    const { email, password} = req.body;
     try {
         const token = await authDAO.login(email, password);
         res.json(token);

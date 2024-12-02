@@ -4,6 +4,7 @@ import axios from 'axios';
 import PaginatedRecipes from './components/PaginatedRecipes.tsx';
 import Login from './components/LoginForm.js'; 
 import TopBar from './components/TopBar.tsx';
+import AdminPanel from './components/AdminPanel.tsx';
 import jwt from 'jsonwebtoken';
 import FilterDrawer from './components/FilterDrawer.tsx';
 import ResetPassword from './components/ResetPassword.tsx';
@@ -12,10 +13,11 @@ import './App.css';
 const App: React.FC = () => {
     const [recipes, setRecipes] = useState<Recipe[]>([]);
     const [isLoggedIn, setIsLoggedIn] = useState(false);
-    const [user, setUser] = useState({ email: '', permission: '' });
+    const [user, setUser] = useState({user_id: '', email: '', permission: '' });
     const [searchTerm, setSearchTerm] = useState('');
     const [filters, setFilters] = useState({});
     const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+    const [isAdminPanelOpen, setIsAdminPanelOpen] = useState(false);   
     const [showResetPassword, setShowResetPassword] = useState(false);
 
     useEffect(() => {
@@ -27,7 +29,7 @@ const App: React.FC = () => {
                 if (token) {
                     setIsLoggedIn(true);
                     const userInfo = jwt.decode(token);
-                    setUser({ email: userInfo.email, permission: userInfo.permission });
+                    setUser({ user_id: userInfo.user_id, email: userInfo.email, permission: userInfo.permission });
                 }
             } catch (err) {
                 console.error(err);
@@ -53,14 +55,14 @@ const App: React.FC = () => {
 
     const handleLoginSuccess = (token) => {
         const userInfo = jwt.decode(token);
-        setUser({ email: userInfo.email, permission: userInfo.permission });
+        setUser({ user_id: userInfo.user_id, email: userInfo.email, permission: userInfo.permission });
         setIsLoggedIn(true);
     };
 
     const handleLogout = () => {
         localStorage.removeItem('token');
         setIsLoggedIn(false);
-        setUser({ email: '', permission: '' });
+        setUser({user_id: '', email: '', permission: '' });
     };
 
     const handleSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -90,6 +92,14 @@ const App: React.FC = () => {
         setShowResetPassword(false);
     };
 
+    const openAdminPanel = () => {
+        setIsAdminPanelOpen(true);
+    };
+
+    const closeAdminPanel = () => {
+        setIsAdminPanelOpen(false);
+    };
+
     return (
         <div>
             <div className='title-banner'>
@@ -107,10 +117,12 @@ const App: React.FC = () => {
                     handleLoginSuccess={handleLoginSuccess}
                     resetPassword={handleResetPassword}
                     toggleDrawer={toggleDrawer}
+                    openAdminPanel={openAdminPanel}
                 />
                 <div>
-                    {isDrawerOpen && <FilterDrawer onFilterChange={handleFilterChange} isLoggedIn={isLoggedIn}/> }
+                    <FilterDrawer isDrawerOpen={isDrawerOpen} onFilterChange={handleFilterChange} isLoggedIn={isLoggedIn}/>
                     <PaginatedRecipes recipes={recipes} searchTerm={searchTerm} filters={filters} isLoggedin={isLoggedIn}/>
+                    <AdminPanel isAdminPanelOpen={isAdminPanelOpen} onClose={closeAdminPanel} recipes={recipes} user_id={Number(user.user_id)}/>
                 </div>
             </div>
         </div>
