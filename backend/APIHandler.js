@@ -5,10 +5,10 @@ const checkAdmin = require('../middleware/checkAdmin.js');
 const RecipesDAO = require('./DAO/RecipesDAO.js');
 const CategoriesDAO = require('./DAO/CategoriesDAO.js');
 const AuthDAO = require('./DAO/AuthDAO.js');
-const UserDAO = require('./DAO/UsersDAO.js');
+const UserDAO = require('./DAO/UsersDao.js');
 const FavoriteRecipesDAO = require('./DAO/FavoriteRecipesDAO');
 
-const dbPath = 'C:\\Users\\miko2\\OneDrive\\Dokumenty\\SSI\\Projekt_SSI\\Tastify\\recipeApp.db';
+const dbPath = '../recipeApp.db';
 const recipesDAO = new RecipesDAO(dbPath);
 const categoriesDAO = new CategoriesDAO(dbPath);
 const authDAO = new AuthDAO(dbPath);
