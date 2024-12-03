@@ -2,12 +2,11 @@ import React, { useState } from 'react';
 import axios from 'axios';
 
 interface ResetPasswordProps {
-    user?: { email: string };
+    user_id: string;
     onClose: () => void;
 }
 
-const ResetPassword: React.FC<ResetPasswordProps> = ({ user, onClose }) => {
-    const [email, setEmail] = useState(user?.email || '');
+const ResetPassword: React.FC<ResetPasswordProps> = ({ user_id, onClose }) => {
     const [oldPassword, setOldPassword] = useState('');
     const [newPassword, setNewPassword] = useState('');
     const [error, setError] = useState('');
@@ -15,12 +14,17 @@ const ResetPassword: React.FC<ResetPasswordProps> = ({ user, onClose }) => {
     const handleResetPassword = async (e: React.FormEvent) => {
         e.preventDefault();
         try {
-            const response = await axios.post('/auth/reset-password', {
-                email,
+            const response = await axios.post('http://localhost:4000/auth/reset-password', {
+                user_id,
                 oldPassword,
                 newPassword,
             });
-            console.log(response.data);
+
+            if(!response.data.success) {
+                setError(response.data.message);
+                return;
+            }
+
             onClose();
         } catch (err) {
             setError(err.response?.data?.error || 'An error occurred');
@@ -30,17 +34,6 @@ const ResetPassword: React.FC<ResetPasswordProps> = ({ user, onClose }) => {
     return (
         <div className="reset-password">
             <form onSubmit={handleResetPassword}>
-                {!user && (
-                    <div className='form-group'>
-                        <label>Email:</label>
-                        <input
-                            type="email"
-                            value={email}
-                            onChange={(e) => setEmail(e.target.value)}
-                            required
-                        />
-                    </div>
-                )}
                 <div className='form-group'>
                     <label>Old Password:</label>
                     <input

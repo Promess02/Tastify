@@ -70,26 +70,36 @@ class AuthDAO {
         });
     }
 
-    resetPassword(email, oldPassword, newPassword) {
+    resetPassword(user_id, oldPassword, newPassword) {
         return new Promise(async (resolve, reject) => {
-            try {
-                console.log(`Oczekiwany komunikat: Resetowanie hasła dla użytkownika z emailem: ${email}`);
-                
-                const hashedPassword = await bcrypt.hash(newPassword, 10);
-                console.log(`Przetwarzany komunikat: Nowe hasło zostało zahashowane dla użytkownika: ${email}`);
-                
-                const sql = 'UPDATE Users SET password = ? WHERE email = ?';
-                this.db.run(sql, [hashedPassword, email], function (err) {
+            try {                
+                const sqlSelect = 'SELECT password FROM Users WHERE user_id = ?';
+                this.db.get(sqlSelect, [user_id], async (err, row) => {
                     if (err) {
-                        console.error(`Błąd podczas resetowania hasła dla użytkownika: ${email}`, err);
-                        reject(err);
-                    } else {
-                        console.log(`Zwracany komunikat: Hasło zresetowane dla użytkownika: ${email}`);
-                        resolve({ changes: this.changes });
+                        return reject(err);
                     }
+    
+                    if (!row) {
+                        return resolve({ success: false, message: 'User not found' });
+                    }
+    
+                    const isMatch = await bcrypt.compare(oldPassword, row.password);
+                    if (!isMatch) {
+                        return resolve({ success: false, message: 'Old password is incorrect' });
+                    }
+                    
+                    const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+                    const sqlUpdate = 'UPDATE Users SET password = ? WHERE user_id = ?';
+                    this.db.run(sqlUpdate, [hashedPassword, user_id], function (err) {
+                        if (err) {
+                            return reject(err);
+                        } else {
+                            return resolve({ success: true, changes: this.changes });
+                        }
+                    });
                 });
             } catch (err) {
-                console.error(`Błąd podczas przetwarzania resetowania hasła dla użytkownika: ${email}`, err);
                 reject(err);
             }
         });

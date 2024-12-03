@@ -107,7 +107,7 @@ const App: React.FC = () => {
             </div>
             <div className='app-container'>
                 {!isLoggedIn && <Login onLoginSuccess={handleLoginSuccess} />}
-                {showResetPassword && <ResetPassword user={user} onClose={handleClose} />}
+                {showResetPassword && <ResetPassword user_id={user.user_id} onClose={handleClose} />}
                 <TopBar
                     user={user}
                     isLoggedIn={isLoggedIn}

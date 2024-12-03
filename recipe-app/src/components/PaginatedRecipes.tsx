@@ -134,7 +134,7 @@ const PaginatedRecipes: React.FC<PaginatedRecipesProps> = ({ recipes, searchTerm
                                     <p>Diet Category: <span>{dishCategories[recipe.diet_category_id]}</span></p>
                                     <p>Calories: <span>{recipe.calories}</span></p>
                                 </div>
-                                <img src={ recipe.image_path } alt={recipe.recipe_name} className='recipe-image' 
+                                <img src={ String(recipe.image_path).at(0)==='/' ? recipe.image_path : '/' + recipe.image_path } alt={recipe.recipe_name} className='recipe-image' 
                                 onError={(e) => { e.currentTarget.src = '/images/gnocci.jpg'; }}/>
                                 {isLoggedin && <FaHeart size={30}
                                     className={`heart-icon ${likedRecipes.includes(recipe.recipe_id) ? 'liked' : ''}`}

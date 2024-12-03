@@ -233,9 +233,9 @@ router.post('/login', async (req, res) => {
 
 // 15. Resetowanie hasła
 router.post('/auth/reset-password', async (req, res) => {
-    const { email, oldPassword, newPassword } = req.body;
+    const { user_id, oldPassword, newPassword } = req.body;
     try {
-        const result = await authDAO.resetPassword(email, oldPassword, newPassword);
+        const result = await authDAO.resetPassword(user_id, oldPassword, newPassword);
         res.json(result);
     } catch (err) {
         res.status(500).json({ error: err.message });
