@@ -7,9 +7,10 @@ import axios from 'axios';
 interface RecipesAdminListProps {
     recipes: Recipe[];
     user_id: number;
+    onUpdateRecipes: (recipes: Recipe[]) => void;
 }
 
-const RecipesAdminList: React.FC<RecipesAdminListProps> = ({ recipes: initialRecipes, user_id}) => {
+const RecipesAdminList: React.FC<RecipesAdminListProps> = ({ recipes: initialRecipes, user_id, onUpdateRecipes}) => {
     const categories = ['', 'Breakfast', 'Lunch', 'Dinner', 'Snack', 'Dessert', 'Vegan', 'Vegetarian', 'Keto', 'Paleo', 'Gluten-Free'];
     const dishCategories = [
         { id: 1, name: 'Breakfast' },
@@ -52,7 +53,11 @@ const RecipesAdminList: React.FC<RecipesAdminListProps> = ({ recipes: initialRec
                         Authorization: `Bearer ${localStorage.getItem('token')}`
                     }
                 });
-                setRecipes(prevRecipes => prevRecipes.filter(recipe => recipe.recipe_id !== recipeId));
+                setRecipes(prevRecipes => {
+                    const updatedRecipes = prevRecipes.filter(recipe => recipe.recipe_id !== recipeId);
+                    onUpdateRecipes(updatedRecipes);
+                    return updatedRecipes;
+                });
             } catch (err) {
                 console.error('Error deleting recipe:', err);
             }
@@ -74,11 +79,13 @@ const RecipesAdminList: React.FC<RecipesAdminListProps> = ({ recipes: initialRec
                     Authorization: `Bearer ${localStorage.getItem('token')}`
                 }
             });
-            setRecipes(prevRecipes =>
-                prevRecipes.map(recipe =>
+            setRecipes(prevRecipes => {
+                const updatedRecipes = prevRecipes.map(recipe =>
                     recipe.recipe_id === updatedRecipe.recipe_id ? updatedRecipe : recipe
-                )
-            );
+                );
+                onUpdateRecipes(updatedRecipes);
+                return updatedRecipes;
+            });
             setEditingRecipe(null);
         } catch (err) {
             console.error('Error updating recipe:', err);
@@ -96,7 +103,11 @@ const RecipesAdminList: React.FC<RecipesAdminListProps> = ({ recipes: initialRec
                     Authorization: `Bearer ${localStorage.getItem('token')}`
                 }
             });
-            setRecipes(prevRecipes => [...prevRecipes, newRecipe]);
+            setRecipes(prevRecipes => {
+                const updatedRecipes = [...prevRecipes, newRecipe];
+                onUpdateRecipes(updatedRecipes);
+                return updatedRecipes;
+            });
             setEditingRecipe(null);
             setIsNewRecipe(false);
         } catch (err) {
@@ -156,8 +167,8 @@ const RecipesAdminList: React.FC<RecipesAdminListProps> = ({ recipes: initialRec
                             <td>{categories[recipe.diet_category_id]}</td>
                             <td>{recipe.update_date}</td>
                             <td>
-                                <FaEdit className="action-icon" onClick={() => handleEditRecipe(recipe)} />
-                                <FaTrash className="action-icon" onClick={() => handleDeleteRecipe(recipe.recipe_id)} />
+                                <FaEdit size={21} className="action-icon" onClick={() => handleEditRecipe(recipe)} />
+                                <FaTrash size={21} className="action-icon" onClick={() => handleDeleteRecipe(recipe.recipe_id)} />
                             </td>
                         </tr>
                     ))}

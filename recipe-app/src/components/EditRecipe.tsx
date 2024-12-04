@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import Recipe from '../DTO/Recipe';
 import '../App.css';
+import UpdateImageModal from './UpdateImageModal.tsx';
 
 interface EditRecipeProps {
     recipe: Recipe;
@@ -12,6 +13,7 @@ interface EditRecipeProps {
 
 const EditRecipe: React.FC<EditRecipeProps> = ({ recipe, dishCategories, dietCategories, onSave, onCancel }) => {
     const [updatedRecipe, setUpdatedRecipe] = useState<Recipe>({ ...recipe });
+    const [showImageUpload, setShowImageUpload] = useState(false);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
         const { name, value } = e.target;
@@ -28,6 +30,21 @@ const EditRecipe: React.FC<EditRecipeProps> = ({ recipe, dishCategories, dietCat
         }
         onSave(updatedRecipe);
     };
+
+    const handleImageSave = (imagePath: string) => {
+        setUpdatedRecipe(prevRecipe => ({
+            ...prevRecipe,
+            image_path: '/images/' + imagePath
+        }));
+    };
+
+    const changeImage = () => {
+        setShowImageUpload(true);
+    }
+
+    const closeChangeImage = () => {   
+        setShowImageUpload(false);
+    } 
 
     return (
         <div className="edit-recipe-modal">
@@ -114,8 +131,10 @@ const EditRecipe: React.FC<EditRecipeProps> = ({ recipe, dishCategories, dietCat
             </div>
             <div className="form-actions">
                 <button onClick={handleSave}>Confirm</button>
+                <button onClick={changeImage}>Change Image</button>
                 <button onClick={onCancel}>Cancel</button>
             </div>
+            {showImageUpload && <UpdateImageModal recipe={recipe} onClose={closeChangeImage} onSave={handleImageSave}/>}
         </div>
     );
 };

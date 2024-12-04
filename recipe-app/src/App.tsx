@@ -8,6 +8,7 @@ import AdminPanel from './components/AdminPanel.tsx';
 import jwt from 'jsonwebtoken';
 import FilterDrawer from './components/FilterDrawer.tsx';
 import ResetPassword from './components/ResetPassword.tsx';
+import { jwtDecode } from 'jwt-decode';
 import './App.css';
 
 const App: React.FC = () => {
@@ -27,9 +28,19 @@ const App: React.FC = () => {
             try {
                 const token = localStorage.getItem('token');
                 if (token) {
-                    setIsLoggedIn(true);
-                    const userInfo = jwt.decode(token);
-                    setUser({ user_id: userInfo.user_id, email: userInfo.email, permission: userInfo.permission });
+                    const decodedToken = jwtDecode<{exp: number}>(token);
+                    const currentTime = Date.now() / 1000;
+                    
+                    // check if token is expired
+                    if (decodedToken.exp < currentTime) {
+                        localStorage.removeItem('token');
+                        setIsLoggedIn(false);
+                        setUser({user_id: '', email: '', permission: '' });
+                    } else {
+                        setIsLoggedIn(true);
+                        const userInfo = jwt.decode(token);
+                        setUser({ user_id: userInfo.user_id, email: userInfo.email, permission: userInfo.permission });
+                    }
                 }
             } catch (err) {
                 console.error(err);
@@ -100,6 +111,10 @@ const App: React.FC = () => {
         setIsAdminPanelOpen(false);
     };
 
+    const handleUpdateRecipes = (updatedRecipes: Recipe[]) => {
+        setRecipes(updatedRecipes);
+    }
+
     return (
         <div>
             <div className='title-banner'>
@@ -121,8 +136,8 @@ const App: React.FC = () => {
                 />
                 <div>
                     <FilterDrawer isDrawerOpen={isDrawerOpen} onFilterChange={handleFilterChange} isLoggedIn={isLoggedIn}/>
-                    <PaginatedRecipes recipes={recipes} searchTerm={searchTerm} filters={filters} isLoggedin={isLoggedIn}/>
-                    <AdminPanel isAdminPanelOpen={isAdminPanelOpen} onClose={closeAdminPanel} recipes={recipes} user_id={Number(user.user_id)}/>
+                    <PaginatedRecipes user_id={user.user_id} recipes={recipes} searchTerm={searchTerm} filters={filters} isLoggedin={isLoggedIn}/>
+                    <AdminPanel isAdminPanelOpen={isAdminPanelOpen} onClose={closeAdminPanel} recipes={recipes} user_id={Number(user.user_id)} onUpdateRecipes={handleUpdateRecipes}/>
                 </div>
             </div>
         </div>

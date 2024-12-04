@@ -74,7 +74,7 @@
 }
 
 .filter-button:hover {
-  background-color: #b12f95;
+  background-color: #7c4b1c;
 }
 
 .filter-drawer {
@@ -100,8 +100,9 @@
 }
 
 .search-bar {
-  width: 600px; /* Fixed width */
+  width: 70%; /* Fixed width */
   padding: 15px;
+
   margin-bottom: 10px;
   border: 1px solid #ddd;
   border-radius: 4px;
@@ -131,9 +132,15 @@
   margin-bottom: 20px;
 }
 
-.recipe-admin-list th, .recipe-list td {
-  border: 1px solid #ddd;
-  padding: 8px;
+.recipe-admin-list td {
+  background-color: #ffd8cc;
+  border: 1px solid #000000;
+  padding: 12px;
+}
+
+.recipe-admin-list th {
+  border: 1px solid #5e2a1a;
+  padding: 12px;
 }
 
 .new-recipe-button {
@@ -153,7 +160,7 @@
 }
 
 .recipe-admin-list th {
-  background-color: #f2f2f2;
+  background-color: #ff7349;
 }
 
 .action-icon {
@@ -163,7 +170,7 @@
 }
 
 .action-icon:hover {
-  color: #b36500;
+  color: #9e462b;
 }
 
 .recipe-list {
@@ -178,10 +185,10 @@
 }
 
 .recipe-item {
-  background-color: #fff;
-  border: 1px solid #ddd;
+  background-color: #fdf0e3;
+  border: 1px solid #ff7424;
   border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 6px 8px rgba(0, 0, 0, 0.1);
   padding: 20px;
   margin-bottom: 20px;
   transition: border-color 0.3s, box-shadow 0.3s;
@@ -229,9 +236,21 @@
   padding: 20px;
   border-radius: 8px;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-  max-width: 600px;
+  max-width: 1000px;
   width: 100%;
   position: relative;
+}
+
+.recipe-details h2 {
+  font-family: 'Pacifico', cursive;
+  color: #ff7349;
+  font-size: 2em;
+}
+
+.recipe-details p strong {
+  font-family: 'Arial', sans-serif;
+  color: #ff7349;
+  font-size: 1em;
 }
 
 .close-button {
@@ -247,6 +266,7 @@
 .recipe-image-details {
   width: 100%;
   height: auto;
+  max-height: 300px;
   object-fit: cover;
   border-radius: 8px;
   margin-bottom: 20px;
@@ -293,6 +313,7 @@
   display: flex;
   align-items: center;
   gap: 10px;
+  color: #964229;
   margin-right: 15px;
 }
 
@@ -427,6 +448,21 @@
   text-align: center;
 }
 
+.login-container .message {
+  color: rgb(219, 40, 40);
+  font-style: bold;
+  margin-bottom: 5px;
+}
+
+.submit-button {
+  background-color: #ff7349;
+  color: white;
+  border: none;
+  width: 70px;
+  height: 35px;
+  border-radius: 5px;
+}
+
 .login-container h2 {
   margin-bottom: 20px;
   font-size: 1.5em;
@@ -489,13 +525,14 @@
   top: 10px;
   right: 10px;
   font-size: 24px;
-  color: #ddd;
+  box-shadow: #282c34;
+  color: #e6cfcf;
   cursor: pointer;
   transition: color 0.3s;
 }
 
 .heart-icon.liked {
-  color: #ff00d4;
+  color: #a8018c;
 }
 
 .App {
@@ -547,20 +584,84 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 1000;
+  z-index: 1002;
+}
+
+.modal-no-overlay{
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 80%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.modal-no-overlay .modal-content {
+  background-color: rgb(255, 236, 219);
+  border: 2dp #5c3100;
+}
+
+.modal-no-overlay .form-actions{
+  display: flex;
+  justify-content: center;
+  gap: 200px;
+  margin-top: 20px;
+}
+
+.modal-no-overlay .form-actions button {
+  padding: 50px 50px;
+  margin: 0 5px;
+}
+.modal-no-overlay .form-group {
+  display: inline-block;
+  position: relative;
+  overflow: hidden;
+  cursor: pointer;
+}
+
+.modal-no-overlay .form-group input[type="file"] {
+  position: absolute;
+  left: 0;
+  top: 0;
+  opacity: 0;
+  cursor: pointer;
+  width: 100%;
+  height: 100%;
+}
+
+.modal-no-overlay .form-group label {
+  display: inline-block;
+  padding: 10px 10px;
+  background-color: #ff7043;
+  color: white;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.modal-no-overlay .form-group label:hover {
+  background-color: #853a23;
 }
 
 .modal-content {
   background-color: white;
   width: 80%;
   height: 90%;
-  padding: 20px;
+  padding: 10px;
   border-radius: 10px;
   position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
+}
+
+.modal-content p {
+  color: rgb(6, 153, 104);
+  font-size: 1em;
+  font-style: bold;
 }
 
 .close-button {
@@ -591,6 +692,7 @@
 
 .admin-button {
   width: 200px;
+  height: 300px;
   padding: 15px;
   margin: 10px;
   font-size: 18px;
@@ -636,26 +738,58 @@
 }
 
 .user-list .filter-dropdown {
-  padding: 10px;
+  padding: 5px;
   font-size: 16px;
   border: 1px solid #ddd;
   border-radius: 5px;
   margin-right: 10px;
 }
 
+.user-list .input-checkbox {
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+  appearance: none;
+  border: 2px solid #1f1f1f;
+  border-radius: 4px;
+  position: relative;
+  outline: none;
+  transition: background-color 0.3s, border-color 0.3s;
+}
+
+.user-list .input-checkbox:checked {
+  background-color: #ff7043;
+  border-color: #ff7043;
+}
+
+.user-list .input-checkbox:checked::after {
+  content: '';
+  position: absolute;
+  width: 6px;
+  height: 12px;
+}
+
 .user-list table {
   width: 100%;
   border-collapse: collapse;
   margin-bottom: 20px;
+  border-radius: 10px;
 }
 
-.user-list th, .user-list td {
-  border: 1px solid #ddd;
-  padding: 8px;
+.user-list th{
+  border: 1px solid #222121;
+  padding: 14px;
 }
+
+.user-list td {
+  background-color: #ffd8cc;
+  border: 1px solid #222121;
+  padding: 12px;
+}
+
 
 .user-list th {
-  background-color: #f2f2f2;
+  background-color: #ff7349;
 }
 
 .pagination {

@@ -51,12 +51,16 @@ const Login = ({ onLoginSuccess }) => {
                 </div>
                 <button type="submit" className='submit-button'>{isRegister ? 'Register' : 'Login'}</button>
             </form>
-            <p className='message'>{message}</p>
+            {message && <p className='message'>{message}</p>}
             <p className='toggle'>
                 {isRegister ? (
-                    <span onClick={() => setIsRegister(false)}>Already registered? Click here to login.</span>
+                    <span onClick={() => {
+                        setIsRegister(false);
+                        setMessage('')}}>Already registered? Click here to login.</span>
                 ) : (
-                    <span onClick={() => setIsRegister(true)}>Click if you are not registered yet.</span>
+                    <span onClick={() => {setIsRegister(true);
+                        setMessage('');
+                    }}>Click if you are not registered yet.</span>
                 )}
             </p>
             <p className='toggle'><span onClick={setResetPassword}>Did you forget your password?</span></p>

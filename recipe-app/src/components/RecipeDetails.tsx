@@ -1,4 +1,5 @@
 import React from 'react';
+import { FaTimes } from 'react-icons/fa';
 import '../App.css';
 
 interface Recipe {
@@ -25,7 +26,9 @@ const RecipeDetails: React.FC<RecipeDetailsProps> = ({ recipe, onClose }) => {
     return (
         <div className="recipe-details-overlay">
             <div className="recipe-details">
-                <button className="close-button" onClick={onClose}>X</button>
+                <button className="close-button" onClick={onClose}>
+                    {<FaTimes size={40} />}
+                </button>
                 <h2>{recipe.recipe_name}</h2>
                 <img src={recipe.image_path || '/images/gnocci.jpg'} alt={recipe.recipe_name} className='recipe-image-details' />
                 <p><strong>Ingredients:</strong> {recipe.ingredients}</p>

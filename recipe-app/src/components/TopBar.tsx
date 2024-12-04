@@ -28,7 +28,7 @@ const TopBar: React.FC<TopBarProps> = ({ user, isLoggedIn, searchTerm, handleSea
                 />
             </div>
                 {isLoggedIn && <div className='profile-button'>
-                    <FaUserCircle size={24} />
+                    <FaUserCircle size={24}/>
                     <p>{user.email}</p>
                     <button onClick={handleLogout}><b>Logout</b></button>
                     <button onClick={resetPassword}><b>Reset Password</b></button>

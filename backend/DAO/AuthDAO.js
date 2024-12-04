@@ -20,17 +20,31 @@ class AuthDAO {
             try {
                 console.log(`Oczekiwany komunikat: Rejestracja użytkownika z emailem: ${email}`);
                 
-                const hashedPassword = await bcrypt.hash(password, 10);
-                console.log(`Przetwarzany komunikat: Hasło zostało zahashowane dla użytkownika: ${email}`);
-                
-                const sql = 'INSERT INTO Users (email, password, permission, block) VALUES (?, ?, ?, ?)';
-                this.db.run(sql, [email, hashedPassword, permission, 'active'], function (err) {
+                // Check if user with the given email already exists
+                const checkUserSql = 'SELECT * FROM Users WHERE email = ?';
+                this.db.get(checkUserSql, [email], async (err, user) => {
                     if (err) {
-                        console.error(`Błąd podczas rejestracji użytkownika: ${email}`, err);
+                        console.error(`Błąd podczas sprawdzania użytkownika: ${email}`, err);
                         reject(err);
+                    } else if (user) {
+                        console.warn(`Ostrzeżenie: Użytkownik z emailem ${email} już istnieje`);
+                        reject(new Error('User with email already registered'));
                     } else {
-                        console.log(`Zwracany komunikat: Użytkownik zarejestrowany z ID: ${this.lastID}`);
-                        resolve({ user_id: this.lastID });
+                        // Hash the password
+                        const hashedPassword = await bcrypt.hash(password, 10);
+                        console.log(`Przetwarzany komunikat: Hasło zostało zahashowane dla użytkownika: ${email}`);
+                        
+                        // Insert the new user
+                        const sql = 'INSERT INTO Users (email, password, permission, block) VALUES (?, ?, ?, ?)';
+                        this.db.run(sql, [email, hashedPassword, permission, 'active'], function (err) {
+                            if (err) {
+                                console.error(`Błąd podczas rejestracji użytkownika: ${email}`, err);
+                                reject(err);
+                            } else {
+                                console.log(`Zwracany komunikat: Użytkownik zarejestrowany z ID: ${this.lastID}`);
+                                resolve({ user_id: this.lastID });
+                            }
+                        });
                     }
                 });
             } catch (err) {
@@ -51,15 +65,19 @@ class AuthDAO {
                     reject(err);
                 } else if (!user) {
                     console.warn(`Ostrzeżenie: Użytkownik nie znaleziony: ${email}`);
-                    await this.loginHistoryDAO.logLogin(null, new Date().toISOString(), 'failure');
                     reject(new Error('User not found'));
                 } else {
                     const isMatch = await bcrypt.compare(password, user.password);
                     if (isMatch) {
-                        const token = jwt.sign({ user_id: user.user_id, email: user.email, permission: user.permission }, 'your_jwt_secret', { expiresIn: '1h' });
-                        console.log(`Zwracany komunikat: Użytkownik zalogowany, token wygenerowany dla: ${email}`);
-                        await this.loginHistoryDAO.logLogin(user.user_id, new Date().toISOString(), 'success');
-                        resolve({ token });
+                        if (user.block === 'blocked') {
+                            console.warn(`Ostrzeżenie: Użytkownik zablokowany: ${email}`);
+                            reject(new Error('User is blocked'));
+                        } else {
+                            const token = jwt.sign({ user_id: user.user_id, email: user.email, permission: user.permission }, 'your_jwt_secret', { expiresIn: '1h' });
+                            console.log(`Zwracany komunikat: Użytkownik zalogowany, token wygenerowany dla: ${email}`);
+                            await this.loginHistoryDAO.logLogin(user.user_id, new Date().toISOString(), 'success');
+                            resolve({ token });
+                        } 
                     } else {
                         console.warn(`Ostrzeżenie: Nieprawidłowe hasło dla użytkownika: ${email}`);
                         await this.loginHistoryDAO.logLogin(user.user_id, new Date().toISOString(), 'failure');

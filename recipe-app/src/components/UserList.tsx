@@ -124,6 +124,7 @@ const UserList: React.FC = () => {
                             <td>{user.email}</td>
                             <td>
                                 <select
+                                    className='filter-dropdown'
                                     value={user.permission}
                                     onChange={(e) => handlePermissionChange(user.user_id, e.target.value as 'user' | 'admin')}
                                 >
@@ -133,6 +134,7 @@ const UserList: React.FC = () => {
                             </td>
                             <td>
                                 <input
+                                    className='input-checkbox'
                                     type="checkbox"
                                     checked={user.block === 'blocked'}
                                     onChange={(e) => handleBlockChange(user.user_id, e.target.checked)}

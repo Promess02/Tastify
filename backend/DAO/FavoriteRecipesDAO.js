@@ -16,7 +16,7 @@ class FavoriteRecipesDAO {
             console.log(`Oczekiwany komunikat: Pobieranie ulubionych przepisów dla użytkownika o ID: ${user_id}`);
             
             const sql = `
-                SELECT Recipes.recipe_name, FavoriteRecipes.update_date
+                SELECT Recipes.recipe_name, Recipes.recipe_id
                 FROM FavoriteRecipes
                 JOIN Recipes ON FavoriteRecipes.recipe_id = Recipes.recipe_id
                 WHERE FavoriteRecipes.user_id = ?`;

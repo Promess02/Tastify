@@ -2,6 +2,7 @@ import React, { useState, useEffect} from 'react';
 import { FaHeart } from 'react-icons/fa';
 import RecipeDetails from './RecipeDetails.tsx';
 import '../App.css';
+import axios from 'axios';
 
 interface Recipe {
     recipe_id: number;
@@ -19,13 +20,14 @@ interface Recipe {
 }
 
 interface PaginatedRecipesProps {
+    user_id: string;
     recipes: Recipe[];
     searchTerm: string;
     filters: any;
     isLoggedin: boolean;
 }
 
-const PaginatedRecipes: React.FC<PaginatedRecipesProps> = ({ recipes, searchTerm, filters, isLoggedin }) => {
+const PaginatedRecipes: React.FC<PaginatedRecipesProps> = ({ user_id, recipes, searchTerm, filters, isLoggedin }) => {
     const [currentPage, setCurrentPage] = useState(1);
     const recipesPerPage = 5;
     const [likedRecipes, setLikedRecipes] = useState<number[]>([]);
@@ -34,32 +36,54 @@ const PaginatedRecipes: React.FC<PaginatedRecipesProps> = ({ recipes, searchTerm
 
     const postNewFavorite = async (recipeId: number) => {
         try {
-            const response = await fetch('http://localhost:4000/favorites', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    Authorization: `Bearer ${localStorage.getItem('token')}`
-                },
-                body: JSON.stringify({ recipe_id: recipeId })
-            });
-            if (response.ok) {
-                setLikedRecipes(prevLikedRecipes => [...prevLikedRecipes, recipeId]);
+            const response = await axios.post('http://localhost:4000/favorites', 
+                { recipe_id: recipeId },
+                {
+                    headers: {
+                        'Content-Type': 'application/json',
+                        Authorization: `Bearer ${localStorage.getItem('token')}`
+                    }
+                }
+            );
+            if (response.status === 200) {
+                setLikedRecipes(prevLikedRecipes =>
+                    prevLikedRecipes.includes(recipeId)
+                        ? prevLikedRecipes.filter(id => id !== recipeId)
+                        : [...prevLikedRecipes, recipeId]
+                );           
             }
         } catch (error) {
             console.error('Error adding favorite:', error);
         }
     };
 
+    const deleteFavorite = async (recipeId: number) => {
+        try {
+            const response = await axios.delete('http://localhost:4000/favorites', {
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${localStorage.getItem('token')}`
+                },
+                data: { recipe_id: recipeId }
+            });
+            if (response.status === 200) {
+                setLikedRecipes(prevLikedRecipes => prevLikedRecipes.filter(id => id !== recipeId));
+            }
+        } catch (error) {
+            console.error('Error deleting favorite:', error);
+        }
+    };
+    
     const fetchLikedRecipes = async () => {
         try {
-            const response = await fetch('http://localhost:4000/favorites', {
+            const response = await axios.get('http://localhost:4000/favorites', {
                 headers: {
                     Authorization: `Bearer ${localStorage.getItem('token')}`
                 }
             });
-            if (response.ok) {
-                const data = await response.json();
-                setLikedRecipes(data.favorites.map((favorite: { recipe_id: number }) => favorite.recipe_id));
+            if (response.status === 200) {
+                const data = response.data;
+                setLikedRecipes(data.map((favorite: { recipe_id: number }) => favorite.recipe_id));
             }
         } catch (error) {
             console.error('Error fetching favorites:', error);
@@ -67,8 +91,9 @@ const PaginatedRecipes: React.FC<PaginatedRecipesProps> = ({ recipes, searchTerm
     };
 
     useEffect(() => {
-        fetchLikedRecipes();
-    }, []);
+        if(isLoggedin)
+            fetchLikedRecipes();
+    }, [isLoggedin]);
 
     const isFiltersEmpty = (filters) => {
         return Object.keys(filters).length === 0;
@@ -94,13 +119,12 @@ const PaginatedRecipes: React.FC<PaginatedRecipesProps> = ({ recipes, searchTerm
     const filteredRecipes = getFilteredRecipes(recipes, filters, searchTerm);
 
     const handleLike = (recipeId: number) => {
-        setLikedRecipes(prevLikedRecipes =>
-            prevLikedRecipes.includes(recipeId)
-                ? prevLikedRecipes.filter(id => id !== recipeId)
-                : [...prevLikedRecipes, recipeId]
-        );
         postNewFavorite(recipeId);
     };
+
+    const handleDislike = (recipeId: number) => {
+        deleteFavorite(recipeId);}
+    ;
 
     const handleRecipeClick = (recipe: Recipe) => {
         setSelectedRecipe(recipe);
@@ -110,7 +134,10 @@ const PaginatedRecipes: React.FC<PaginatedRecipesProps> = ({ recipes, searchTerm
         setSelectedRecipe(null);
     };
 
-    const indexOfLastRecipe = currentPage * recipesPerPage;
+     const totalPages = Math.ceil(filteredRecipes.length / recipesPerPage);
+     const validCurrentPage = Math.min(currentPage, totalPages);
+ 
+    const indexOfLastRecipe = validCurrentPage * recipesPerPage;
     const indexOfFirstRecipe = indexOfLastRecipe - recipesPerPage;
     const currentRecipes = filteredRecipes.slice(indexOfFirstRecipe, indexOfLastRecipe);
 
@@ -136,11 +163,15 @@ const PaginatedRecipes: React.FC<PaginatedRecipesProps> = ({ recipes, searchTerm
                                 </div>
                                 <img src={ String(recipe.image_path).at(0)==='/' ? recipe.image_path : '/' + recipe.image_path } alt={recipe.recipe_name} className='recipe-image' 
                                 onError={(e) => { e.currentTarget.src = '/images/gnocci.jpg'; }}/>
-                                {isLoggedin && <FaHeart size={30}
+                                {isLoggedin && <FaHeart size={40}
                                     className={`heart-icon ${likedRecipes.includes(recipe.recipe_id) ? 'liked' : ''}`}
                                     onClick={(e) =>{
                                         e.stopPropagation();
-                                        handleLike(recipe.recipe_id);
+                                        if (likedRecipes.includes(recipe.recipe_id)) {
+                                            handleDislike(recipe.recipe_id);
+                                        } else {
+                                            handleLike(recipe.recipe_id);
+                                        }
                                     } }
                                 />
                                 }

@@ -1,5 +1,5 @@
 import React, {useState} from 'react';
-import { FaUsers, FaUtensils, FaArrowLeft } from 'react-icons/fa';
+import { FaUsers, FaUtensils, FaArrowLeft, FaTimes } from 'react-icons/fa';
 import UserList from './UserList.tsx';
 import '../App.css';
 import RecipesAdminList from './RecipesAdminList.tsx';
@@ -10,9 +10,10 @@ interface AdminPanelProps {
     onClose: () => void;
     recipes: Recipe[];
     user_id: number;
+    onUpdateRecipes: (recipes: Recipe[]) => void;
 }
 
-const AdminPanel: React.FC<AdminPanelProps> = ({ isAdminPanelOpen, onClose, recipes, user_id}) => {
+const AdminPanel: React.FC<AdminPanelProps> = ({ isAdminPanelOpen, onClose, recipes, user_id, onUpdateRecipes}) => {
     const [view, setView] = useState<'buttons' | 'users' | 'recipes'> ('buttons');
 
     const onManageUsers = () => {
@@ -34,21 +35,23 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ isAdminPanelOpen, onClose, reci
     return (
         <div className="modal-overlay">
             <div className="modal-content">
-                <button className="close-button" onClick={onClose}>X</button>
+                <button className="close-button" onClick={onClose}>
+                    <FaTimes size={40} />
+                </button>
                 {view !== 'buttons' && (
                     <button className="back-button" onClick={goBack}>
-                        <FaArrowLeft size={24} />
+                        <FaArrowLeft size={40} />
                     </button>
                 )}
                 {view === 'buttons' && (
                     <div className="admin-buttons">
                         <button className="admin-button" onClick={onManageUsers}>
                             Manage Users
-                            <FaUsers size={24} />
+                            <FaUsers size={40} />
                         </button>
                         <button className="admin-button" onClick={onManageRecipes}>
                             Manage Recipes
-                            <FaUtensils size={24} />
+                            <FaUtensils size={40} />
                         </button>
                     </div>
                 )}
@@ -57,7 +60,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ isAdminPanelOpen, onClose, reci
                 )}
                 {view === 'recipes' && (
                     <div className="recipe-list">
-                        <RecipesAdminList recipes={recipes} user_id={user_id}/>
+                        <RecipesAdminList recipes={recipes} user_id={user_id} onUpdateRecipes={onUpdateRecipes}/>
                     </div>
                 )}
             </div>
