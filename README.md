@@ -21,7 +21,7 @@ Follow these instructions to set up and run the project on your local machine.
    cd Tastify
 
 2. **Install all packages:**
-    ``sh
+    ```sh
     cd backend
     npm i .
     cd ../middleware
@@ -30,14 +30,15 @@ Follow these instructions to set up and run the project on your local machine.
     npm i .
 
 3. **Running the backend server:**
-    ``sh
+    ```sh
     cd backend
     node server.js
 
 4. **Running the frontend app:**
-    ``sh
+    ```sh
     cd recipe-app
     npm start
 
 5. **Running the database (optional):**
+    ```sh
     sqlite3 recipeApp.db
