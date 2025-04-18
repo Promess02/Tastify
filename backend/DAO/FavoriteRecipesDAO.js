@@ -1,19 +1,12 @@
-const sqlite3 = require('sqlite3').verbose();
+const sqlite3 = require('sqlite3');
 
 class FavoriteRecipesDAO {
     constructor(dbPath) {
-        this.db = new sqlite3.Database(dbPath, (err) => {
-            if (err) {
-                console.log(`komunikat oczekiwany: Failed to connect to database: ${err.message}`);
-            } else {
-                console.log('komunikat oczekiwany: Connected to the database.');
-            }
-        });
+        this.db = new sqlite3.Database(dbPath);
     }
 
     getFavoritesByUser(user_id) {
         return new Promise((resolve, reject) => {
-            console.log(`Oczekiwany komunikat: Pobieranie ulubionych przepisów dla użytkownika o ID: ${user_id}`);
             
             const sql = `
                 SELECT Recipes.recipe_name, Recipes.recipe_id
@@ -23,10 +16,8 @@ class FavoriteRecipesDAO {
 
             this.db.all(sql, [user_id], (err, rows) => {
                 if (err) {
-                    console.error(`Błąd podczas pobierania ulubionych przepisów dla użytkownika o ID: ${user_id}`, err);
                     reject(err);
                 } else {
-                    console.log(`Zwracany komunikat: Znaleziono ulubione przepisy dla użytkownika o ID: ${user_id}: ${JSON.stringify(rows)}`);
                     resolve(rows);
                 }
             });
@@ -35,7 +26,6 @@ class FavoriteRecipesDAO {
 
     addFavorite(user_id, recipe_id, update_date) {
         return new Promise((resolve, reject) => {
-            console.log(`Oczekiwany komunikat: Dodawanie ulubionego przepisu o ID: ${recipe_id} dla użytkownika o ID: ${user_id}`);
             
             const sql = `
                 INSERT INTO FavoriteRecipes (user_id, recipe_id, update_date)
@@ -43,33 +33,29 @@ class FavoriteRecipesDAO {
 
             this.db.run(sql, [user_id, recipe_id, update_date], function (err) {
                 if (err) {
-                    console.error(`Błąd podczas dodawania ulubionego przepisu o ID: ${recipe_id} dla użytkownika o ID: ${user_id}`, err);
                     reject(err);
                 } else {
-                    console.log(`Zwracany komunikat: Dodano ulubiony przepis o ID: ${recipe_id} dla użytkownika o ID: ${user_id}`);
-                    resolve({ favorite_id: this.lastID });
+                    resolve({ message: "favourite added" });
                 }
             });
         });
     }
 
     async updateFavorites(user_id, favorites) {
-        return new Promise(async (resolve, reject) => {
-            console.log(`Oczekiwany komunikat: Rozpoczynanie aktualizacji ulubionych przepisów dla użytkownika o ID: ${user_id}`);
-            
+        return new Promise(async (resolve, reject) => {            
             try {
-                await this.db.run('BEGIN TRANSACTION');
+                await new Promise((resolve, reject) => {
+                    this.db.run('BEGIN TRANSACTION', (err) => {
+                        if (err) reject(err);
+                        else resolve();
+                    });
+                });
 
                 await new Promise((resolve, reject) => {
                     const sql = 'DELETE FROM FavoriteRecipes WHERE user_id = ?';
                     this.db.run(sql, [user_id], (err) => {
-                        if (err) {
-                            console.error(`Błąd podczas usuwania ulubionych przepisów dla użytkownika o ID: ${user_id}`, err);
-                            reject(err);
-                        } else {
-                            console.log(`Zwracany komunikat: Usunięto ulubione przepisy dla użytkownika o ID: ${user_id}`);
-                            resolve();
-                        }
+                        if (err) reject(new Error('Deletion failed'));
+                        else resolve();
                     });
                 });
 
@@ -79,24 +65,29 @@ class FavoriteRecipesDAO {
                         const sql = `
                             INSERT INTO FavoriteRecipes (user_id, recipe_id, update_date)
                             VALUES (?, ?, ?)`;
-                        this.db.run(sql, [user_id, recipe_id, update_date], function (err) {
-                            if (err) {
-                                console.error(`Błąd podczas dodawania ulubionego przepisu o ID: ${recipe_id} dla użytkownika o ID: ${user_id}`, err);
-                                reject(err);
-                            } else {
-                                console.log(`Zwracany komunikat: Dodano ulubiony przepis o ID: ${recipe_id} dla użytkownika o ID: ${user_id}`);
-                                resolve();
-                            }
+                        this.db.run(sql, [user_id, recipe_id, update_date], (err) => {
+                            if (err) reject(new Error('Insertion failed'));
+                            else resolve();
                         });
                     });
                 }
 
-                await this.db.run('COMMIT');
-                console.log(`Zwracany komunikat: Ulubione przepisy zaktualizowane pomyślnie dla użytkownika o ID: ${user_id}`);
+                await new Promise((resolve, reject) => {
+                    this.db.run('COMMIT', (err) => {
+                        if (err) reject(err);
+                        else resolve();
+                    });
+                });
+    
                 resolve({ message: 'Favorites updated successfully' });
             } catch (err) {
-                await this.db.run('ROLLBACK');
-                console.error(`Błąd podczas aktualizacji ulubionych przepisów dla użytkownika o ID: ${user_id}`, err);
+                 // Rollback transaction on error
+                await new Promise((resolve, reject) => {
+                    this.db.run('ROLLBACK', (rollbackErr) => {
+                        if (rollbackErr) reject(rollbackErr);
+                        else resolve();
+                    });
+                });
                 reject(err);
             }
         });
@@ -104,16 +95,13 @@ class FavoriteRecipesDAO {
 
     removeFavorite(user_id, recipe_id) {
         return new Promise((resolve, reject) => {
-            console.log(`Oczekiwany komunikat: Usuwanie ulubionego przepisu o ID: ${recipe_id} dla użytkownika o ID: ${user_id}`);
-            
             const sql = 'DELETE FROM FavoriteRecipes WHERE user_id = ? AND recipe_id = ?';
+            let changes = 'user_id: ' + user_id + ", recipe_id" + recipe_id;
             this.db.run(sql, [user_id, recipe_id], function (err) {
                 if (err) {
-                    console.error(`Błąd podczas usuwania ulubionego przepisu o ID: ${recipe_id} dla użytkownika o ID: ${user_id}`, err);
                     reject(err);
                 } else {
-                    console.log(`Zwracany komunikat: Usunięto ulubiony przepis o ID: ${recipe_id} dla użytkownika o ID: ${user_id}, zmiany: ${this.changes}`);
-                    resolve({ deleted: this.changes });
+                    resolve({ deleted: changes });
                 }
             });
         });
