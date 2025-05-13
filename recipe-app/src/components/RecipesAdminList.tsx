@@ -2,7 +2,7 @@ import React, {useState} from 'react';
 import { FaEdit, FaTrash } from 'react-icons/fa';
 import Recipe from '../DTO/Recipe';
 import EditRecipe from './EditRecipe.tsx';
-import axios from 'axios';
+import RecipesListController from '../Controllers/RecipeListController.ts';
 
 interface RecipesAdminListProps {
     recipes: Recipe[];
@@ -45,16 +45,12 @@ const RecipesAdminList: React.FC<RecipesAdminListProps> = ({ recipes: initialRec
         setCurrentPage(pageNumber);
     };
 
-    const handleDeleteRecipe = (recipeId: number) => {
+    const handleDeleteRecipe = async (recipeId: number) => {
         if (window.confirm('Are you sure you want to delete this recipe?')) {
-            try{
-                axios.delete(`http://localhost:4000/recipes/${recipeId}`, {
-                    headers: {
-                        Authorization: `Bearer ${localStorage.getItem('token')}`
-                    }
-                });
-                setRecipes(prevRecipes => {
-                    const updatedRecipes = prevRecipes.filter(recipe => recipe.recipe_id !== recipeId);
+            try {
+                await RecipesListController.deleteRecipe(recipeId);
+                setRecipes((prevRecipes) => {
+                    const updatedRecipes = prevRecipes.filter((recipe) => recipe.recipe_id !== recipeId);
                     onUpdateRecipes(updatedRecipes);
                     return updatedRecipes;
                 });
@@ -74,14 +70,10 @@ const RecipesAdminList: React.FC<RecipesAdminListProps> = ({ recipes: initialRec
         updatedRecipe.dish_category_id = Number(updatedRecipe.dish_category_id);
         updatedRecipe.diet_category_id = Number(updatedRecipe.diet_category_id);
         try {
-            await axios.put(`http://localhost:4000/recipes/${updatedRecipe.recipe_id}`, updatedRecipe, {
-                headers: {
-                    Authorization: `Bearer ${localStorage.getItem('token')}`
-                }
-            });
-            setRecipes(prevRecipes => {
-                const updatedRecipes = prevRecipes.map(recipe =>
-                    recipe.recipe_id === updatedRecipe.recipe_id ? updatedRecipe : recipe
+            const savedRecipe = await RecipesListController.updateRecipe(updatedRecipe);
+            setRecipes((prevRecipes) => {
+                const updatedRecipes = prevRecipes.map((recipe) =>
+                    recipe.recipe_id === savedRecipe.recipe_id ? savedRecipe : recipe
                 );
                 onUpdateRecipes(updatedRecipes);
                 return updatedRecipes;
@@ -92,19 +84,15 @@ const RecipesAdminList: React.FC<RecipesAdminListProps> = ({ recipes: initialRec
         }
     };
 
-    const handleNewRecipe = async (newRecipe: Recipe) => {
+const handleNewRecipe = async (newRecipe: Recipe) => {
         newRecipe.update_date = new Date().toISOString().split('T')[0];
         newRecipe.author_id = user_id;
         newRecipe.dish_category_id = Number(newRecipe.dish_category_id);
         newRecipe.diet_category_id = Number(newRecipe.diet_category_id);
         try {
-            await axios.post('http://localhost:4000/recipes', newRecipe, {
-                headers: {
-                    Authorization: `Bearer ${localStorage.getItem('token')}`
-                }
-            });
-            setRecipes(prevRecipes => {
-                const updatedRecipes = [...prevRecipes, newRecipe];
+            const createdRecipe = await RecipesListController.createRecipe(newRecipe);
+            setRecipes((prevRecipes) => {
+                const updatedRecipes = [...prevRecipes, createdRecipe];
                 onUpdateRecipes(updatedRecipes);
                 return updatedRecipes;
             });

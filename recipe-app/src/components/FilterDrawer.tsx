@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import '../App.css';
-import axios from 'axios';
+import { fetchDishCategories, fetchDietCategories } from '../Controllers/FilterController.ts';
 
 interface Category {
     category_id: number;
@@ -26,26 +26,19 @@ const FilterDrawer: React.FC<FilterDrawerProps> = ({ isDrawerOpen, onFilterChang
     const [showOnlyFavorites, setShowOnlyFavorites] = useState(false);
 
     useEffect(() => {
-        const fetchDishCategories = async () => {
+        const fetchCategories = async () => {
             try {
-                const response = await axios.get('http://localhost:4000/recipes/getDishCategories');
-                setDishCategories(response.data.categories);
+                const dishCategories = await fetchDishCategories();
+                setDishCategories(dishCategories);
+
+                const dietCategories = await fetchDietCategories();
+                setDietCategories(dietCategories);
             } catch (error) {
                 console.error('Error fetching categories:', error);
             }
         };
 
-        const fetchDietCategories = async () => {
-            try {
-                const response = await axios.get('http://localhost:4000/recipes/getDietCategories');
-                setDietCategories(response.data.categories);
-            } catch (error) {
-                console.error('Error fetching categories:', error);
-            }
-        };
-
-        fetchDishCategories();
-        fetchDietCategories();
+        fetchCategories();
     }, []);
 
     const handleFilterChange = () => {
@@ -55,9 +48,10 @@ const FilterDrawer: React.FC<FilterDrawerProps> = ({ isDrawerOpen, onFilterChang
             dietCategory,
             calories,
             numOfPortions,
-            showOnlyFavorites
+            showOnlyFavorites,
         });
     };
+
 
     const handleToggleChange = () => {
         setShowOnlyFavorites(!showOnlyFavorites);

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import '../App.css';
 import Recipe from '../DTO/Recipe';
+import { uploadImage } from '../Controllers/ImageController.ts';
 
 interface UpdateImageModalProps {
     recipe: Recipe;
@@ -27,25 +28,8 @@ const UpdateImageModal: React.FC<UpdateImageModalProps> = ({ recipe, onClose, on
             const formData = new FormData();
             formData.append('image', imageFile);
             formData.append('imageName', imageFile.name);
-            setImagePath('/images/' + imageFile.name);
-    
-            try {
-                const response = await fetch('http://localhost:4000/upload', {
-                    method: 'POST',
-                    body: formData,
-                });
-    
-                if (response.ok) {
-                    const data = await response.json();
-                    onSave(imageFile.name);
-                    onClose();
-                } else {
-                    alert('Failed to upload image');
-                }
-            } catch (error) {
-                console.error('Error uploading image:', error);
-                alert('Error uploading image');
-            }
+            setImagePath('/images/' + imageFile.name);    
+            uploadImage(formData, imageFile, onSave, onClose);
         } else {
             alert('No image file selected');
         }

@@ -2,7 +2,8 @@ import React, { useState, useEffect} from 'react';
 import { FaHeart } from 'react-icons/fa';
 import RecipeDetails from './RecipeDetails.tsx';
 import '../App.css';
-import axios from 'axios';
+import { postNewFavorite, deleteFavorite, fetchLikedRecipes } from '../Controllers/FavoritesController.ts';
+
 
 interface Recipe {
     recipe_id: number;
@@ -34,65 +35,30 @@ const PaginatedRecipes: React.FC<PaginatedRecipesProps> = ({ user_id, recipes, s
     const [selectedRecipe, setSelectedRecipe] = useState<Recipe | null>(null);
     const dishCategories = ['', 'Breakfast', 'Lunch', 'Dinner', 'Snack', 'Dessert', 'Vegan', 'Vegetarian', 'Keto', 'Paleo', 'Gluten-Free'];
 
-    const postNewFavorite = async (recipeId: number) => {
+    const handleLike = async (recipeId: number) => {
         try {
-            const response = await axios.post('http://localhost:4000/favorites', 
-                { recipe_id: recipeId },
-                {
-                    headers: {
-                        'Content-Type': 'application/json',
-                        Authorization: `Bearer ${localStorage.getItem('token')}`
-                    }
-                }
-            );
-            if (response.status === 200) {
-                setLikedRecipes(prevLikedRecipes =>
-                    prevLikedRecipes.includes(recipeId)
-                        ? prevLikedRecipes.filter(id => id !== recipeId)
-                        : [...prevLikedRecipes, recipeId]
-                );           
-            }
+            await postNewFavorite(recipeId);
+            setLikedRecipes(prevLikedRecipes => [...prevLikedRecipes, recipeId]);
         } catch (error) {
-            console.error('Error adding favorite:', error);
+            console.error('Error liking recipe:', error);
         }
     };
 
-    const deleteFavorite = async (recipeId: number) => {
+    const handleDislike = async (recipeId: number) => {
         try {
-            const response = await axios.delete('http://localhost:4000/favorites', {
-                headers: {
-                    'Content-Type': 'application/json',
-                    Authorization: `Bearer ${localStorage.getItem('token')}`
-                },
-                data: { recipe_id: recipeId }
-            });
-            if (response.status === 200) {
-                setLikedRecipes(prevLikedRecipes => prevLikedRecipes.filter(id => id !== recipeId));
-            }
+            await deleteFavorite(recipeId);
+            setLikedRecipes(prevLikedRecipes => prevLikedRecipes.filter(id => id !== recipeId));
         } catch (error) {
-            console.error('Error deleting favorite:', error);
-        }
-    };
-    
-    const fetchLikedRecipes = async () => {
-        try {
-            const response = await axios.get('http://localhost:4000/favorites', {
-                headers: {
-                    Authorization: `Bearer ${localStorage.getItem('token')}`
-                }
-            });
-            if (response.status === 200) {
-                const data = response.data;
-                setLikedRecipes(data.map((favorite: { recipe_id: number }) => favorite.recipe_id));
-            }
-        } catch (error) {
-            console.error('Error fetching favorites:', error);
+            console.error('Error disliking recipe:', error);
         }
     };
 
     useEffect(() => {
-        if(isLoggedin)
-            fetchLikedRecipes();
+        if (isLoggedin) {
+            fetchLikedRecipes()
+                .then((likedRecipes) => setLikedRecipes(likedRecipes))
+                .catch((error) => console.error('Error fetching liked recipes:', error));
+        }
     }, [isLoggedin]);
 
     const isFiltersEmpty = (filters) => {
@@ -117,14 +83,6 @@ const PaginatedRecipes: React.FC<PaginatedRecipesProps> = ({ user_id, recipes, s
     };
 
     const filteredRecipes = getFilteredRecipes(recipes, filters, searchTerm);
-
-    const handleLike = (recipeId: number) => {
-        postNewFavorite(recipeId);
-    };
-
-    const handleDislike = (recipeId: number) => {
-        deleteFavorite(recipeId);}
-    ;
 
     const handleRecipeClick = (recipe: Recipe) => {
         setSelectedRecipe(recipe);

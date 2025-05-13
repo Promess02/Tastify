@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import User from '../DTO/User';
 import '../App.css';
-import axios from 'axios';
+import { fetchUsers, updateUserPermission, updateUserBlockStatus } from '../Controllers/UserListController.ts';
 
 const UserList: React.FC = () => {
     const [users, setUsers] = useState<User[]>([]);
@@ -27,34 +27,24 @@ const UserList: React.FC = () => {
         setCurrentPage(pageNumber);
     };
 
-    useEffect(() => {
-        const fetchUsers = async () => {
+   useEffect(() => {
+        const loadUsers = async () => {
             try {
-                const response = await axios.get('http://localhost:4000/users', {
-                    headers: {
-                        Authorization: `Bearer ${localStorage.getItem('token')}`
-                    }
-                });
-                setUsers(response.data);
+                const users = await fetchUsers();
+                setUsers(users);
             } catch (err) {
                 console.error(err);
             }
         };
-        fetchUsers();
-
+        loadUsers();
     }, []);
 
     const handlePermissionChange = async (userId: number, newPermission: 'user' | 'admin') => {
         try {
-            await axios.put(`http://localhost:4000/users/${userId}/permissions`, {
-                permission: newPermission
-            }, {
-                headers: {
-                    Authorization: `Bearer ${localStorage.getItem('token')}`
-                }
-            });
-            setUsers(prevUsers => prevUsers.map(user => 
-                user.user_id === userId ? { ...user, permission: newPermission } : user
+            await updateUserPermission(userId, newPermission);
+            setUsers(prevUsers =>
+                prevUsers.map(user =>
+                    user.user_id === userId ? { ...user, permission: newPermission } : user
                 )
             );
         } catch (err) {
@@ -64,12 +54,7 @@ const UserList: React.FC = () => {
 
     const handleBlockChange = async (userId: number, isBlocked: boolean) => {
         try {
-            const endpoint = isBlocked ? 'block' : 'unblock';
-            await axios.put(`http://localhost:4000/users/${userId}/${endpoint}`, {}, {
-                headers: {
-                    Authorization: `Bearer ${localStorage.getItem('token')}`
-                }
-            });
+            await updateUserBlockStatus(userId, isBlocked);
             setUsers(prevUsers =>
                 prevUsers.map(user =>
                     user.user_id === userId ? { ...user, block: isBlocked ? 'blocked' : 'active' } : user

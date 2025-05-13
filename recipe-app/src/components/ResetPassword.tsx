@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import axios from 'axios';
+import { resetPassword } from '../Controllers/LoginController.ts';
+
 
 interface ResetPasswordProps {
     user_id: string;
@@ -13,22 +14,7 @@ const ResetPassword: React.FC<ResetPasswordProps> = ({ user_id, onClose }) => {
 
     const handleResetPassword = async (e: React.FormEvent) => {
         e.preventDefault();
-        try {
-            const response = await axios.post('http://localhost:4000/auth/reset-password', {
-                user_id,
-                oldPassword,
-                newPassword,
-            });
-
-            if(!response.data.success) {
-                setError(response.data.message);
-                return;
-            }
-
-            onClose();
-        } catch (err) {
-            setError(err.response?.data?.error || 'An error occurred');
-        }
+        resetPassword(user_id, oldPassword, newPassword, setError, onClose);
     };
 
     return (

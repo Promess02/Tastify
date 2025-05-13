@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import axios from 'axios';
+import { loginUser, registerUser } from '../Controllers/LoginController.ts';
 
 const Login = ({ onLoginSuccess }) => {
     const [email, setEmail] = useState('');
@@ -10,16 +10,18 @@ const Login = ({ onLoginSuccess }) => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        const endpoint = isRegister ? '/register' : '/login';
-        try {
-            const response = await axios.post(`http://localhost:4000${endpoint}`, { email, password });
-            setMessage(isRegister ? 'Registration successful!' : 'Login successful!');
-            if (!isRegister) {
-                localStorage.setItem('token', response.data.token);
-                onLoginSuccess(response.data.token);
+         try {
+            if (isRegister) {
+                await registerUser(email, password);
+                setMessage('Registration successful!');
+            } else {
+                const data = await loginUser(email, password);
+                setMessage('Login successful!');
+                localStorage.setItem('token', data.token);
+                onLoginSuccess(data.token);
             }
         } catch (err) {
-            setMessage(err.response.data.error);
+            setMessage(err);
         }
     };
 
