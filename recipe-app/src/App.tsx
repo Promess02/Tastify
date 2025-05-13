@@ -20,6 +20,7 @@ const App: React.FC = () => {
     const [isDrawerOpen, setIsDrawerOpen] = useState(false);
     const [isAdminPanelOpen, setIsAdminPanelOpen] = useState(false);   
     const [showResetPassword, setShowResetPassword] = useState(false);
+    const [showLogin, setShowLogin] = useState(false);
 
     useEffect(() => {
         const fetchRecipes = async () => {
@@ -64,10 +65,30 @@ const App: React.FC = () => {
         }
     }, [isDrawerOpen]);
 
+    useEffect(() => {
+        if (showLogin) {
+            const timer = setTimeout(() => {
+                document.addEventListener('click', handleClickOutside);
+            }, 0);
+            return () => {
+                clearTimeout(timer);
+                document.removeEventListener('click', handleClickOutside);
+            };
+        } else {
+            document.removeEventListener('click', handleClickOutside);
+        }
+    }, [showLogin]);
+
+    const toggleLogin = () => {
+        setShowLogin((prev) => !prev);
+    };
+
+
     const handleLoginSuccess = (token) => {
         const userInfo = jwt.decode(token);
         setUser({ user_id: userInfo.user_id, email: userInfo.email, permission: userInfo.permission });
         setIsLoggedIn(true);
+        setShowLogin(false);
     };
 
     const handleLogout = () => {
@@ -92,6 +113,10 @@ const App: React.FC = () => {
         const drawer = document.querySelector('.filter-drawer');
         if (drawer && !drawer.contains(event.target as Node)) {
             setIsDrawerOpen(false);
+        }
+        const loginForm = document.querySelector('.login-container');
+        if (loginForm && !loginForm.contains(event.target as Node)) {
+            setShowLogin(false);
         }
     };
 
@@ -121,7 +146,7 @@ const App: React.FC = () => {
                 <h1>Tastify</h1>
             </div>
             <div className='app-container'>
-                {!isLoggedIn && <Login onLoginSuccess={handleLoginSuccess} />}
+                {showLogin && !isLoggedIn && <Login onLoginSuccess={handleLoginSuccess} />}
                 {showResetPassword && <ResetPassword user_id={user.user_id} onClose={handleClose} />}
                 <TopBar
                     user={user}
@@ -133,6 +158,7 @@ const App: React.FC = () => {
                     resetPassword={handleResetPassword}
                     toggleDrawer={toggleDrawer}
                     openAdminPanel={openAdminPanel}
+                    toggleLogin={toggleLogin}
                 />
                 <div>
                     <FilterDrawer isDrawerOpen={isDrawerOpen} onFilterChange={handleFilterChange} isLoggedIn={isLoggedIn}/>
