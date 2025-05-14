@@ -1,22 +1,24 @@
 const webpack = require('webpack');
 
-module.exports = function override(config, env) {
-    config.resolve.fallback = {
-        crypto: require.resolve('crypto-browserify'),
-        stream: require.resolve('stream-browserify'),
-        util: require.resolve('util/'),
-        process: require.resolve('process/browser'),
-    };
-    config.plugins = (config.plugins || []).concat([
-        new webpack.ProvidePlugin({
-            process: 'process/browser',
-        }),
-    ]);
-    config.module.rules.unshift({
-        test: /\.m?js$/,
-        resolve: {
-          fullySpecified: false, // disable the behavior
-        },
-      });
-    return config;
+module.exports = function override(config) {
+  // Add polyfills for Node.js core modules
+  config.resolve.fallback = {
+    crypto: require.resolve('crypto-browserify'),
+    buffer: require.resolve('buffer/'),
+    process: require.resolve('process/browser'),
+    stream: require.resolve('stream-browserify'),
+    util: require.resolve('util/'),
+    vm: require.resolve('vm-browserify'),
+    ...config.resolve.fallback,
+  };
+
+  // Add plugins to provide global variables
+  config.plugins = (config.plugins || []).concat([
+    new webpack.ProvidePlugin({
+      Buffer: ['buffer', 'Buffer'],
+      process: 'process/browser.js',
+    }),
+  ]);
+
+  return config;
 };

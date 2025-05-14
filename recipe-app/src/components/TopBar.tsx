@@ -33,8 +33,10 @@ const TopBar: React.FC<TopBarProps> = ({ user, isLoggedIn, searchTerm, handleSea
                     <FaUserCircle size={24} />
                     <p>{user.email}</p>
                     <button onClick={handleLogout}><b>Logout</b></button>
-                    <button onClick={resetPassword}><b>Reset Password</b></button>
-                    {user.permission === 'admin' && <button onClick={openAdminPanel}><b>Admin panel</b></button>}
+                    <button className="two-line-button" onClick={resetPassword}>
+                    <b>Reset<br />Password</b>
+                    </button>
+                    {user.permission === 'admin' && <button className="two-line-button" onClick={openAdminPanel}><b>Admin<br/> panel</b></button>}
                 </div>
             ) : (
                 <button className="login-toggle-button" onClick={toggleLogin}><b>Login</b></button>
