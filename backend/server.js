@@ -14,6 +14,6 @@ app.use(apiHandler);
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 
 app.listen(4000, () => {
-    console.log('Server is running on port 4000');
+    console.log('Server is running on http://localhost:4000');
     console.log('Swagger docs available at http://localhost:4000/api-docs');
 });

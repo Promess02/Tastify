@@ -10,8 +10,6 @@ const FavoriteRecipesDAO = require('./DAO/FavoriteRecipesDAO');
 const multer = require('multer');
 const fs = require('fs');
 const path = require('path');
-
-
 const dbPath = '../recipeApp.db';
 const recipesDAO = new RecipesDAO(dbPath);
 const categoriesDAO = new CategoriesDAO(dbPath);

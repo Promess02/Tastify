@@ -15,10 +15,8 @@ RUN npm install -g concurrently@7.6.0
 FROM node:16 AS frontend
 
 WORKDIR /app/recipe-app
-
 COPY recipe-app/package*.json ./
 COPY recipe-app/ ./
-
 RUN npm install && npx update-browserslist-db@latest
 
 # ---------- Middleware Build Stage ----------
@@ -33,7 +31,6 @@ RUN npm install
 
 # ---------- Final Image ----------
 FROM node:16
-
 WORKDIR /app
 
 # Set environment variables
